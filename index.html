@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz della Democrazia</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e9f1ff;--card:#ffffff;--ink:#10264d;--mute:#4f6286;--blue:#1f5fd1;--blue2:#174aa6;--sun:#ffc83d;--ok:#13804f;--okbg:#d6f5e6;--bad:#c4343a;--badbg:#fde0e1;--line:#c9d8f2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1730;--card:#13264a;--ink:#eaf1ff;--mute:#a7b8da;--blue:#6ea0ff;--blue2:#9bbcff;--sun:#ffc83d;--ok:#5fe0a0;--okbg:#0f3a2a;--bad:#ff8c90;--badbg:#42202a;--line:#2a4172}}
+:root[data-theme="dark"]{--bg:#0b1730;--card:#13264a;--ink:#eaf1ff;--mute:#a7b8da;--blue:#6ea0ff;--blue2:#9bbcff;--sun:#ffc83d;--ok:#5fe0a0;--okbg:#0f3a2a;--bad:#ff8c90;--badbg:#42202a;--line:#2a4172}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Fredoka",system-ui,"Segoe UI",sans-serif;min-height:100vh;display:flex;justify-content:center;padding:16px}
+main{width:100%;max-width:640px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-weight:600}
+.bar{flex:1;height:14px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--sun);border-radius:99px;transition:width .4s}
+.pill{background:var(--card);border:2px solid var(--line);border-radius:99px;padding:4px 12px;white-space:nowrap}
+#snd{cursor:pointer;font:inherit;color:var(--ink)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:24px 20px;box-shadow:0 6px 0 var(--line)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.05;margin:8px 0 12px;letter-spacing:-.5px}
+h2{font-size:clamp(22px,5.5vw,28px);line-height:1.2;margin:6px 0 18px;font-weight:600}
+p{color:var(--mute);font-size:18px;line-height:1.45;margin:0 0 18px}
+.mascot{font-size:64px;line-height:1}
+.opts{display:grid;gap:10px}
+.opt,.go{font:inherit;font-size:19px;font-weight:500;text-align:left;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:14px 16px;cursor:pointer;box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+.opt:hover:not(:disabled){border-color:var(--blue);transform:translateY(-1px)}
+.opt:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.opt:focus-visible,.go:focus-visible,#snd:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.opt.ok{background:var(--okbg);border-color:var(--ok);box-shadow:0 4px 0 var(--ok)}
+.opt.no{background:var(--badbg);border-color:var(--bad);box-shadow:0 4px 0 var(--bad);animation:shake .35s}
+.opt:disabled{cursor:default}
+.go{background:var(--blue);color:#fff;border-color:var(--blue2);box-shadow:0 5px 0 var(--blue2);text-align:center;width:100%;margin-top:16px;font-size:21px;font-weight:600}
+:root:not([data-theme="light"]) .go{color:#06142e}
+.fb{margin-top:16px;padding:12px 14px;border-radius:14px;font-size:18px;line-height:1.4}
+.fb.ok{background:var(--okbg);color:var(--ok)}.fb.no{background:var(--badbg);color:var(--bad)}
+.fb b{display:block;font-size:20px}
+.score{font-size:64px;font-weight:700;color:var(--blue);margin:4px 0}
+.stars{font-size:40px;letter-spacing:4px}
+.hide{display:none!important}
+.pop{position:fixed;pointer-events:none;font-size:30px;animation:fly 1s ease-out forwards;z-index:9}
+@keyframes fly{0%{opacity:1;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(1.3) rotate(var(--r))}}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@media (prefers-reduced-motion:reduce){.pop{display:none}.opt.no{animation:none}}
+</style>
+</head>
+<body>
+<main>
+ <div class="top">
+  <div class="bar" aria-hidden="true"><i id="pb"></i></div>
+  <span class="pill" id="streak" title="Serie di risposte giuste">🔥 0</span>
+  <span class="pill" id="pts">⭐ 0</span>
+  <button class="pill" id="snd" aria-label="Attiva o disattiva i suoni">🔊</button>
+ </div>
+
+ <section class="card" id="start">
+  <div class="mascot">🏛️</div>
+  <h1>Il Quiz della Democrazia</h1>
+  <p>12 domande sul potere del popolo, da Atene alla Costituzione italiana. Rispondi giusto di fila per fare una serie 🔥 e guadagnare più punti!</p>
+  <button class="go" id="play">Si parte! 🎺</button>
+ </section>
+
+ <section class="card hide" id="game">
+  <div class="mascot" id="mas">🤔</div>
+  <h2 id="q"></h2>
+  <div class="opts" id="opts"></div>
+  <div class="fb hide" id="fb"></div>
+  <button class="go hide" id="next">Avanti</button>
+ </section>
+
+ <section class="card hide" id="end" style="text-align:center">
+  <div class="mascot" id="emo">🏆</div>
+  <h1 id="rank"></h1>
+  <div class="stars" id="stars"></div>
+  <div class="score" id="fin"></div>
+  <p id="msg"></p>
+  <button class="go" id="again">Gioca ancora 🔁</button>
+ </section>
+</main>
+
+<script>
+var Q=[
+{q:"Da quali parole greche nasce «democrazia»?",o:["demos (popolo) + kratos (potere)","demos (popolo) + polis (città)","kratos (potere) + nomos (legge)","demos (popolo) + agorà (piazza)"],a:0,w:"Democrazia significa «il potere del popolo»: un modo di governare che dipende dalla volontà del popolo."},
+{q:"Dove e quando è nato il modello greco di democrazia?",o:["Ad Atene, nel V secolo a.C.","A Sparta, nel I secolo d.C.","A Roma, nel III secolo a.C.","A Tebe, nel X secolo a.C."],a:0,w:"Il modello greco fu fondato nel V secolo a.C. nella città di Atene."},
+{q:"Vero o falso? Ad Atene i cittadini eleggevano dei rappresentanti che governavano al posto loro.",o:["Vero","Falso"],a:1,w:"Era una democrazia diretta: era il popolo stesso a incontrarsi, discutere e decidere."},
+{q:"Perché ad Atene era possibile una democrazia diretta?",o:["Perché «il popolo» era una categoria molto limitata","Perché Atene era una città enorme","Perché non esistevano leggi","Perché governava un solo re"],a:0,w:"Solo una parte degli abitanti contava come «popolo», quindi le assemblee restavano gestibili."},
+{q:"Secondo la definizione, in una democrazia la sovranità è esercitata…",o:["direttamente o indirettamente dal popolo","da un solo sovrano","solo dai più ricchi","dall’esercito"],a:0,w:"La democrazia è la forma di governo dove la sovranità è esercitata, direttamente o indirettamente, dal popolo."},
+{q:"Quale tipo di democrazia usa per esempio i referendum?",o:["Democrazia diretta","Democrazia rappresentativa","Monarchia","Dittatura"],a:0,w:"Nella democrazia diretta i cittadini partecipano personalmente alle decisioni, ad esempio con i referendum."},
+{q:"Nella democrazia rappresentativa i cittadini…",o:["eleggono rappresentanti che decidono al loro posto","decidono tutto da soli ogni giorno","non votano mai","obbediscono a un capo"],a:0,w:"I cittadini scelgono dei rappresentanti che prendono le decisioni al loro posto."},
+{q:"Quale principio dice che tutti hanno gli stessi diritti davanti alla legge?",o:["Uguaglianza","Libertà","Pluralismo","Diritto di voto"],a:0,w:"Uguaglianza: tutti i cittadini hanno gli stessi diritti davanti alla legge."},
+{q:"Vero o falso? Il pluralismo significa che possono esistere partiti politici e idee diverse.",o:["Vero","Falso"],a:0,w:"Esatto: nel pluralismo convivono partiti e idee diverse."},
+{q:"Cosa significa il principio di libertà?",o:["Ogni persona può esprimere le proprie idee e opinioni","Ognuno può ignorare le leggi","Si può votare solo una volta nella vita","Solo i politici possono parlare"],a:0,w:"Libertà: ogni persona può esprimere le proprie idee e opinioni."},
+{q:"Che tipo di Stato è l’Italia?",o:["Una Repubblica democratica","Una monarchia assoluta","Un impero","Una dittatura"],a:0,w:"I cittadini eleggono i propri rappresentanti e partecipano alla vita politica attraverso il voto."},
+{q:"Secondo l’articolo 1 della Costituzione, l’Italia è fondata sul…",o:["lavoro","commercio","esercito","denaro"],a:0,w:"Art. 1: «L’Italia è una Repubblica democratica, fondata sul lavoro. La sovranità appartiene al popolo»."}
+];
+var $=function(i){return document.getElementById(i)};
+var i=0,score=0,streak=0,best=0,right=0,locked=false,on=true,ac=null;
+
+function ctx(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==="suspended")ac.resume();return ac}
+function tone(f,t,d,type,v){if(!on)return;var c=ctx();if(!c)return;var o=c.createOscillator(),g=c.createGain(),s=c.currentTime+t;o.type=type||"sine";o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(v||0.2,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+d);o.connect(g);g.connect(c.destination);o.start(s);o.stop(s+d+0.05)}
+var snd={
+ click:function(){tone(520,0,.08,"triangle",.15)},
+ good:function(){[523,659,784,1047].forEach(function(f,k){tone(f,k*.08,.18,"triangle",.22)})},
+ combo:function(){[659,784,988,1319,1568].forEach(function(f,k){tone(f,k*.07,.2,"square",.12)})},
+ bad:function(){tone(300,0,.2,"sawtooth",.18);tone(190,.15,.35,"sawtooth",.18)},
+ win:function(){[523,523,523,659,784,659,784,1047].forEach(function(f,k){tone(f,k*.13,.22,"triangle",.24)})},
+ lose:function(){[392,370,349,330].forEach(function(f,k){tone(f,k*.18,.3,"sine",.22)})}
+};
+
+function pop(emojis,el){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;var r=el.getBoundingClientRect();for(var k=0;k<14;k++){var s=document.createElement("span");s.className="pop";s.textContent=emojis[k%emojis.length];s.style.left=(r.left+r.width/2)+"px";s.style.top=(r.top+r.height/2)+"px";s.style.setProperty("--x",(Math.random()*300-150)+"px");s.style.setProperty("--y",(-Math.random()*220-30)+"px");s.style.setProperty("--r",(Math.random()*360-180)+"deg");document.body.appendChild(s);setTimeout(function(n){return function(){n.remove()}}(s),1000)}}
+
+function shuffle(a){for(var k=a.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=a[k];a[k]=a[j];a[j]=t}return a}
+function hud(){$("pts").textContent="⭐ "+score;$("streak").textContent="🔥 "+streak;$("pb").style.width=(i/Q.length*100)+"%"}
+
+function show(id){["start","game","end"].forEach(function(s){$(s).classList.toggle("hide",s!==id)})}
+
+function render(){
+ locked=false;var d=Q[i];$("q").textContent=d.q;$("mas").textContent="🤔";
+ $("fb").classList.add("hide");$("next").classList.add("hide");
+ var box=$("opts");box.innerHTML="";
+ var items=d.o.map(function(t,k){return {t:t,c:k===d.a}});
+ if(d.o.length>2)shuffle(items);
+ items.forEach(function(it){var b=document.createElement("button");b.className="opt";b.textContent=it.t;b.onclick=function(){answer(b,it.c)};box.appendChild(b)});
+ hud();
+}
+
+function answer(btn,correct){
+ if(locked)return;locked=true;
+ var btns=$("opts").children;
+ var d=Q[i],fb=$("fb");
+ for(var k=0;k<btns.length;k++){btns[k].disabled=true;if(btns[k].textContent===d.o[d.a])btns[k].classList.add("ok")}
+ if(correct){
+  streak++;right++;if(streak>best)best=streak;
+  var gain=100+Math.min(streak-1,4)*25;score+=gain;
+  (streak>=3?snd.combo:snd.good)();
+  pop(["🎉","⭐","✨","🏛️","👏"],btn);$("mas").textContent=streak>=3?"🤩":"😄";
+  fb.className="fb ok";fb.innerHTML="<b>Giusto! +"+gain+" punti"+(streak>=3?" 🔥 serie da "+streak:"")+"</b>"+d.w;
+ }else{
+  streak=0;btn.classList.add("no");snd.bad();$("mas").textContent="😅";
+  fb.className="fb no";fb.innerHTML="<b>Ops, non proprio!</b>"+d.w;
+ }
+ hud();
+ $("next").textContent=i===Q.length-1?"Vedi il risultato 🏁":"Avanti";
+ $("next").classList.remove("hide");
+ $("next").focus();
+}
+
+function finish(){
+ i=Q.length;hud();show("end");
+ var p=right/Q.length,rank,emo,msg,st;
+ if(p===1){rank="Pericle in persona!";emo="🏆";st="⭐⭐⭐";msg="Punteggio perfetto: la democrazia non ha segreti per te."}
+ else if(p>=.75){rank="Cittadino modello";emo="🥇";st="⭐⭐⭐";msg="Ottimo lavoro! Ripassa qualche dettaglio e arrivi al massimo."}
+ else if(p>=.5){rank="Cittadino attivo";emo="🥈";st="⭐⭐";msg="Buon risultato, ma si può fare ancora meglio. Riprova!"}
+ else{rank="Cittadino in erba";emo="🌱";st="⭐";msg="Rileggi la presentazione e poi sfida di nuovo il quiz."}
+ $("rank").textContent=rank;$("emo").textContent=emo;$("stars").textContent=st;
+ $("fin").textContent=score+" punti";
+ $("msg").textContent=right+" risposte giuste su "+Q.length+" · miglior serie: "+best+" 🔥. "+msg;
+ (p>=.5?snd.win:snd.lose)();
+ if(p>=.5)setTimeout(function(){pop(["🎉","🏛️","⭐","🎊","🏆"],$("emo"))},200);
+}
+
+$("play").onclick=function(){ctx();snd.click();i=0;score=0;streak=0;best=0;right=0;show("game");render()};
+$("next").onclick=function(){snd.click();i++;if(i>=Q.length)finish();else render()};
+$("again").onclick=function(){snd.click();i=0;score=0;streak=0;best=0;right=0;show("game");render()};
+$("snd").onclick=function(){on=!on;this.textContent=on?"🔊":"🔇";if(on)snd.click()};
+</script>
+</body>
+</html>
